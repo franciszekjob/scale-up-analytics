@@ -193,7 +193,4 @@ The project assumes `Spark` is the primary `scale-out` comparison.
 
 ## Notebooks and report
 
-- [notebooks/README.md](/Users/franciszekjob/studia/AGH/s8/lsc/scale-up-analytics/notebooks/README.md)
-  describes the recommended notebook flow.
-- [report/report_template.md](/Users/franciszekjob/studia/AGH/s8/lsc/scale-up-analytics/report/report_template.md)
-  is the report skeleton aligned with the benchmark outputs.
+See the `notebooks/` directory.
