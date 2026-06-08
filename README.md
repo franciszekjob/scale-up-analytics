@@ -191,6 +191,10 @@ The project assumes `Spark` is the primary `scale-out` comparison.
 - Start with a small pilot run to verify correctness and estimate costs.
 - Keep cluster sizing documented in the report.
 
-## Notebooks and report
+## Notebooks
 
 See the `notebooks/` directory.
+
+## Report
+
+See the `report/main.pdf` for the final report.
