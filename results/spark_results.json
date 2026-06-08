@@ -1,0 +1,203 @@
+{
+  "cluster_info": {
+    "spark_version": "3.5.0-amzn-1",
+    "default_parallelism": 24,
+    "s3_bucket": "tpch-bench-100gb-lsc-project",
+    "n_runs": 4,
+    "benchmark_start": "2026-06-06T14:23:01.889871"
+  },
+  "results": [
+    {
+      "system": "Spark",
+      "query": "Q1_pricing_summary",
+      "run_index": 0,
+      "elapsed_s": 15.987,
+      "result_rows": 4,
+      "timestamp": "2026-06-06T14:23:17.884106"
+    },
+    {
+      "system": "Spark",
+      "query": "Q1_pricing_summary",
+      "run_index": 1,
+      "elapsed_s": 9.89,
+      "result_rows": 4,
+      "timestamp": "2026-06-06T14:23:27.774944"
+    },
+    {
+      "system": "Spark",
+      "query": "Q1_pricing_summary",
+      "run_index": 2,
+      "elapsed_s": 9.284,
+      "result_rows": 4,
+      "timestamp": "2026-06-06T14:23:37.059368"
+    },
+    {
+      "system": "Spark",
+      "query": "Q1_pricing_summary",
+      "run_index": 3,
+      "elapsed_s": 8.89,
+      "result_rows": 4,
+      "timestamp": "2026-06-06T14:23:45.949864"
+    },
+    {
+      "system": "Spark",
+      "query": "Q3_shipping_priority",
+      "run_index": 0,
+      "elapsed_s": 19.539,
+      "result_rows": 10,
+      "timestamp": "2026-06-06T14:24:05.489088"
+    },
+    {
+      "system": "Spark",
+      "query": "Q3_shipping_priority",
+      "run_index": 1,
+      "elapsed_s": 16.395,
+      "result_rows": 10,
+      "timestamp": "2026-06-06T14:24:21.884885"
+    },
+    {
+      "system": "Spark",
+      "query": "Q3_shipping_priority",
+      "run_index": 2,
+      "elapsed_s": 16.161,
+      "result_rows": 10,
+      "timestamp": "2026-06-06T14:24:38.046156"
+    },
+    {
+      "system": "Spark",
+      "query": "Q3_shipping_priority",
+      "run_index": 3,
+      "elapsed_s": 15.937,
+      "result_rows": 10,
+      "timestamp": "2026-06-06T14:24:53.984204"
+    },
+    {
+      "system": "Spark",
+      "query": "Q5_local_supplier_volume",
+      "run_index": 0,
+      "elapsed_s": 27.881,
+      "result_rows": 5,
+      "timestamp": "2026-06-06T14:25:21.866091"
+    },
+    {
+      "system": "Spark",
+      "query": "Q5_local_supplier_volume",
+      "run_index": 1,
+      "elapsed_s": 26.805,
+      "result_rows": 5,
+      "timestamp": "2026-06-06T14:25:48.672392"
+    },
+    {
+      "system": "Spark",
+      "query": "Q5_local_supplier_volume",
+      "run_index": 2,
+      "elapsed_s": 27.11,
+      "result_rows": 5,
+      "timestamp": "2026-06-06T14:26:15.783151"
+    },
+    {
+      "system": "Spark",
+      "query": "Q5_local_supplier_volume",
+      "run_index": 3,
+      "elapsed_s": 26.455,
+      "result_rows": 5,
+      "timestamp": "2026-06-06T14:26:42.239822"
+    },
+    {
+      "system": "Spark",
+      "query": "Q6_revenue_change",
+      "run_index": 0,
+      "elapsed_s": 4.632,
+      "result_rows": 1,
+      "timestamp": "2026-06-06T14:26:46.872423"
+    },
+    {
+      "system": "Spark",
+      "query": "Q6_revenue_change",
+      "run_index": 1,
+      "elapsed_s": 3.337,
+      "result_rows": 1,
+      "timestamp": "2026-06-06T14:26:50.210175"
+    },
+    {
+      "system": "Spark",
+      "query": "Q6_revenue_change",
+      "run_index": 2,
+      "elapsed_s": 2.969,
+      "result_rows": 1,
+      "timestamp": "2026-06-06T14:26:53.179682"
+    },
+    {
+      "system": "Spark",
+      "query": "Q6_revenue_change",
+      "run_index": 3,
+      "elapsed_s": 2.906,
+      "result_rows": 1,
+      "timestamp": "2026-06-06T14:26:56.085692"
+    },
+    {
+      "system": "Spark",
+      "query": "Q10_returned_item",
+      "run_index": 0,
+      "elapsed_s": 15.603,
+      "result_rows": 20,
+      "timestamp": "2026-06-06T14:27:11.689414"
+    },
+    {
+      "system": "Spark",
+      "query": "Q10_returned_item",
+      "run_index": 1,
+      "elapsed_s": 14.082,
+      "result_rows": 20,
+      "timestamp": "2026-06-06T14:27:25.771917"
+    },
+    {
+      "system": "Spark",
+      "query": "Q10_returned_item",
+      "run_index": 2,
+      "elapsed_s": 13.969,
+      "result_rows": 20,
+      "timestamp": "2026-06-06T14:27:39.740979"
+    },
+    {
+      "system": "Spark",
+      "query": "Q10_returned_item",
+      "run_index": 3,
+      "elapsed_s": 13.986,
+      "result_rows": 20,
+      "timestamp": "2026-06-06T14:27:53.727944"
+    },
+    {
+      "system": "Spark",
+      "query": "Q21_suppliers_waiting",
+      "run_index": 0,
+      "elapsed_s": 58.266,
+      "result_rows": 100,
+      "timestamp": "2026-06-06T14:28:51.995220"
+    },
+    {
+      "system": "Spark",
+      "query": "Q21_suppliers_waiting",
+      "run_index": 1,
+      "elapsed_s": 55.75,
+      "result_rows": 100,
+      "timestamp": "2026-06-06T14:29:47.745786"
+    },
+    {
+      "system": "Spark",
+      "query": "Q21_suppliers_waiting",
+      "run_index": 2,
+      "elapsed_s": 54.705,
+      "result_rows": 100,
+      "timestamp": "2026-06-06T14:30:42.451935"
+    },
+    {
+      "system": "Spark",
+      "query": "Q21_suppliers_waiting",
+      "run_index": 3,
+      "elapsed_s": 55.62,
+      "result_rows": 100,
+      "timestamp": "2026-06-06T14:31:38.073022"
+    }
+  ]
+}

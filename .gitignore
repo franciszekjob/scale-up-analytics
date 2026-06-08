@@ -60,7 +60,6 @@ data/
 *.duckdb.wal
 
 # Benchmark / results output
-results/
 *.log
 
 # LaTeX build artifacts
