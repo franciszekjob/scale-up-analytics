@@ -1,0 +1,529 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Scale-Up Analytics: DuckDB vs Apache Spark</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@4.6.0/dist/reset.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@4.6.0/dist/reveal.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@4.6.0/dist/theme/white.css">
+  <style>
+    .reveal h1,
+    .reveal h2,
+    .reveal h3 {
+      text-transform: none;
+      color: #111;
+    }
+
+    .reveal h2 {
+      margin-bottom: 0.45em;
+    }
+
+    .reveal p,
+    .reveal li,
+    .reveal td,
+    .reveal th {
+      color: #222;
+    }
+
+    .reveal .slides section {
+      text-align: left;
+      line-height: 1.3;
+    }
+
+    .reveal ul {
+      margin: 0.3em 0;
+    }
+
+    .reveal ul li {
+      margin-bottom: 0.15em;
+    }
+
+    .duck {
+      color: #1f77b4;
+      font-weight: bold;
+    }
+
+    .spark {
+      color: #e55a00;
+      font-weight: bold;
+    }
+
+    .two-col {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 2rem;
+    }
+
+    table.t {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.8em;
+    }
+
+    table.t th {
+      background: #f0f0f0;
+      padding: 0.3em 0.6em;
+      border: 1px solid #ccc;
+      vertical-align: top;
+    }
+
+    table.t td {
+      padding: 0.28em 0.6em;
+      border: 1px solid #ccc;
+      vertical-align: top;
+    }
+
+    table.t.compact {
+      font-size: 0.66em;
+    }
+
+    table.t.compact th,
+    table.t.compact td {
+      padding: 0.22em 0.5em;
+    }
+
+    .note {
+      font-size: 0.82em;
+      margin-top: 0.6rem;
+    }
+
+    img.chart {
+      max-width: 100%;
+      max-height: 54vh;
+      display: block;
+      margin: 0.4rem auto;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="reveal">
+    <div class="slides">
+
+      <!-- 1. Title -->
+      <section style="text-align:center;">
+        <h1 style="font-size:1.8em;">Scale-Up Analytics</h1>
+        <h2 style="font-size:1.2em; font-weight:normal; color:#444;">
+          <span class="duck">DuckDB</span> vs <span class="spark">Apache Spark</span>
+          &nbsp;-&nbsp; TPC-H 100 GB Benchmark
+        </h2>
+        <br>
+        <p style="color:#555;">Franciszek Job &nbsp;&amp;&nbsp; Przemysław Popowski</p>
+        <p style="color:#777; font-size:0.85em;">AGH University of Science and Technology &nbsp;·&nbsp; 2025/26</p>
+      </section>
+
+      <!-- 2. Scale-Up vs Scale-Out -->
+      <section>
+        <h2>Scale-Up vs Scale-Out</h2>
+        <div class="two-col" style="margin-top:1rem;">
+          <div>
+            <h3 class="duck">Scale-Up</h3>
+            <ul>
+              <li>One powerful machine</li>
+              <li>Large RAM, many CPU cores</li>
+              <li>No network overhead</li>
+              <li>Simple to operate</li>
+              <li><em>Example: HPC fat node, workstation</em></li>
+            </ul>
+          </div>
+          <div>
+            <h3 class="spark">Scale-Out</h3>
+            <ul>
+              <li>Many commodity machines</li>
+              <li>Distributed memory and compute</li>
+              <li>Fault-tolerant, elastic</li>
+              <li>Higher operational complexity</li>
+              <li><em>Example: AWS EMR cluster</em></li>
+            </ul>
+          </div>
+        </div>
+      </section>
+
+      <!-- 3. Main question -->
+      <section>
+        <h2>Main Question</h2>
+        <br>
+        <blockquote style="font-size:1.3em; border-left: 5px solid #1f77b4; padding-left: 1.2rem; color:#111;">
+          Can a single node with enough RAM match a distributed cluster for analytical SQL workloads?
+        </blockquote>
+        <br>
+        <p>Modern servers offer lots of RAM. If data fits in memory, is the complexity of a
+          cluster even necessary?</p>
+      </section>
+
+      <!-- 4. Environments -->
+      <section>
+        <h2>Our Environments</h2>
+        <div class="two-col" style="margin-top:0.8rem;">
+          <div>
+            <h3 class="duck">Scale-Up - Ares HPC</h3>
+            <table class="t">
+              <tr>
+                <td>Platform</td>
+                <td><strong>PLGrid, Cyfronet</strong></td>
+              </tr>
+              <tr>
+                <td>vCPU</td>
+                <td>8</td>
+              </tr>
+              <tr>
+                <td>Total RAM</td>
+                <td>187 GB</td>
+              </tr>
+              <tr>
+                <td>Engine RAM</td>
+                <td><strong>128 GB</strong></td>
+              </tr>
+              <tr>
+                <td>Filesystem</td>
+                <td>Lustre NFS</td>
+              </tr>
+              <tr>
+                <td>Job scheduler</td>
+                <td>SLURM</td>
+              </tr>
+            </table>
+          </div>
+          <div>
+            <h3 class="spark">Scale-Out - AWS EMR</h3>
+            <table class="t">
+              <tr>
+                <td>Platform</td>
+                <td><strong>AWS EMR 7.1.0</strong></td>
+              </tr>
+              <tr>
+                <td>Core nodes</td>
+                <td>3× m5.4xlarge</td>
+              </tr>
+              <tr>
+                <td>Total vCPU</td>
+                <td>48</td>
+              </tr>
+              <tr>
+                <td>Engine RAM</td>
+                <td><strong>128 GB</strong></td>
+              </tr>
+              <tr>
+                <td>Storage</td>
+                <td>Amazon S3</td>
+              </tr>
+              <tr>
+                <td>Region</td>
+                <td>us-east-1</td>
+              </tr>
+            </table>
+          </div>
+        </div>
+        <p style="text-align:center; margin-top:1rem; font-size:0.85em; color:#555;">
+          Both sides allocated the same <strong>128 GB</strong> for the analytical engine.
+        </p>
+      </section>
+
+      <!-- 5. Technologies -->
+      <section>
+        <h2>Technologies</h2>
+        <div class="two-col" style="margin-top:0.8rem;">
+          <div>
+            <h3 class="duck">DuckDB 0.10+</h3>
+            <ul style="font-size:0.9em;">
+              <li>Embedded analytical database</li>
+              <li>Vectorized columnar execution</li>
+              <li>Reads Parquet natively</li>
+              <li>Host-process</li>
+            </ul>
+          </div>
+          <div>
+            <h3 class="spark">Apache Spark 3.5</h3>
+            <ul style="font-size:0.9em;">
+              <li>Distributed processing framework</li>
+              <li>Adaptive Query Execution (AQE)</li>
+              <li>Spark SQL on Parquet from S3</li>
+              <li>Managed by AWS EMR</li>
+            </ul>
+          </div>
+        </div>
+        <br>
+        <p style="font-size:0.88em;">Data format: parquet</p>
+      </section>
+
+      <!-- 6. Dataset -->
+      <section>
+        <h2>Dataset: TPC-H</h2>
+        <div class="two-col" style="margin-top:0.5rem; align-items:start;">
+          <table class="t" style="font-size:0.6em;">
+            <thead>
+              <tr>
+                <th>Table</th>
+                <th>Rows</th>
+                <th>Raw size</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><code>lineitem</code></td>
+                <td>~600 M</td>
+                <td><strong>~68 GB</strong></td>
+              </tr>
+              <tr>
+                <td><code>orders</code></td>
+                <td>~150 M</td>
+                <td>~15 GB</td>
+              </tr>
+              <tr>
+                <td><code>partsupp</code></td>
+                <td>~80 M</td>
+                <td>~10 GB</td>
+              </tr>
+              <tr>
+                <td><code>customer</code></td>
+                <td>~15 M</td>
+                <td>~2.3 GB</td>
+              </tr>
+              <tr>
+                <td><code>part</code></td>
+                <td>~20 M</td>
+                <td>~2.3 GB</td>
+              </tr>
+              <tr>
+                <td><code>supplier</code></td>
+                <td>~1 M</td>
+                <td>~136 MB</td>
+              </tr>
+              <tr>
+                <td><code>nation / region</code></td>
+                <td>&lt;30</td>
+                <td>&lt;1 MB</td>
+              </tr>
+              <tr>
+                <td><strong>Total</strong></td>
+                <td></td>
+                <td><strong>~100 GB</strong></td>
+              </tr>
+            </tbody>
+          </table>
+          <div style="font-size:0.9em; line-height:1.9;">
+            <p><strong>TPC-H</strong> - industry standard Decision Support benchmark (used e.g. by Alibaba, AMD, Dell)
+            </p>
+            <p>Scale Factor 100 → ~100 GB raw data</p>
+            <p>Parquet: ~26 GB on Ares (ZSTD, ~4× smaller), ~33 GB on S3 (Spark default, ~3×)</p>
+            <p>Widely used to compare OLAP engines</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- 6b. Dataset schema -->
+      <section>
+        <h2>Dataset: TPC-H</h2>
+        <img src="tpch_clients.png" alt="TPC-H schema" style="max-height:70vh; width:auto; border-radius:8px;">
+      </section>
+
+      <!-- 7. How we compare -->
+      <section>
+        <h2>How We Compare</h2>
+        <ul style="line-height:2;">
+          <li>Run the same 6 SQL queries on both engines</li>
+          <li>Each query executed <strong>3 warm runs</strong> (1 cold discarded)</li>
+          <li>Measure: <strong>execution time</strong> (mean, min, max)</li>
+          <li>We compute <strong>speedup = Spark time / DuckDB time</strong></li>
+        </ul>
+      </section>
+
+      <!-- 8. Expected results -->
+      <section>
+        <h2>Expected Results</h2>
+        <ul style="line-height:2;">
+          <li>Spark expected to win on <strong>large full-table scans</strong> - more CPU cores (48 vs 8)</li>
+          <li>DuckDB expected to win on <strong>complex joins</strong> - no shuffle overhead</li>
+          <li>At 100 GB with equal RAM, results should be <strong>close overall</strong></li>
+          <li class="fragment">We expected Spark to have a clear edge - the results surprised us</li>
+        </ul>
+      </section>
+
+      <!-- 9. Queries -->
+      <section>
+        <h2>Benchmark Queries</h2>
+        <table class="t compact">
+          <thead>
+            <tr>
+              <th>Query</th>
+              <th>Name</th>
+              <th>Pattern</th>
+              <th>What it tests</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>Q1</strong></td>
+              <td>Pricing Summary</td>
+              <td>Aggregation</td>
+              <td>Full scan of 68 GB lineitem</td>
+            </tr>
+            <tr>
+              <td><strong>Q3</strong></td>
+              <td>Shipping Priority</td>
+              <td>3-table JOIN + GROUP BY</td>
+              <td>Classic OLAP join</td>
+            </tr>
+            <tr>
+              <td><strong>Q5</strong></td>
+              <td>Local Supplier Volume</td>
+              <td>6-table JOIN</td>
+              <td>Complex multi-join</td>
+            </tr>
+            <tr>
+              <td><strong>Q6</strong></td>
+              <td>Revenue Change</td>
+              <td>Filter + aggregation</td>
+              <td>IO-bound, range predicates</td>
+            </tr>
+            <tr>
+              <td><strong>Q10</strong></td>
+              <td>Returned Items</td>
+              <td>4-table JOIN + filter</td>
+              <td>Grouped reporting</td>
+            </tr>
+            <tr>
+              <td><strong>Q21</strong></td>
+              <td>Suppliers Who Kept Orders</td>
+              <td>EXISTS / NOT EXISTS</td>
+              <td>Correlated subqueries</td>
+            </tr>
+          </tbody>
+        </table>
+      </section>
+
+      <!-- 10. Results: Execution Times -->
+      <section>
+        <h2>Results: Execution Times</h2>
+        <img class="chart" src="figures/01_execution_time_comparison.png" alt="Execution time comparison">
+      </section>
+
+      <!-- 11. Results: Speedup -->
+      <section>
+        <h2>Results: Speedup (Spark / DuckDB)</h2>
+        <img class="chart" src="figures/02_speedup_ratio.png" alt="Speedup ratio">
+        <p style="text-align:center; font-size:0.9em;">
+          <strong>3 wins each</strong> - DuckDB wins Q3, Q5, Q21 &nbsp;·&nbsp; Spark wins Q1, Q6, Q10
+        </p>
+      </section>
+
+      <!-- 12. When Spark wins -->
+      <section>
+        <h2>When <span class="spark">Spark</span> Wins</h2>
+        <table class="t" style="margin-top:0.5rem;">
+          <thead>
+            <tr>
+              <th>Query</th>
+              <th>DuckDB</th>
+              <th>Spark</th>
+              <th>Reason</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>Q6</strong></td>
+              <td>12.04 s</td>
+              <td><strong>3.07 s</strong></td>
+              <td>Simple filter + agg - 48 vCPU and AQE dominate</td>
+            </tr>
+            <tr>
+              <td><strong>Q1</strong></td>
+              <td>18.49 s</td>
+              <td><strong>9.35 s</strong></td>
+              <td>Full 68 GB scan - raw CPU parallelism wins</td>
+            </tr>
+            <tr>
+              <td><strong>Q10</strong></td>
+              <td>25.17 s</td>
+              <td><strong>14.01 s</strong></td>
+              <td>4-table JOIN distributed across cluster</td>
+            </tr>
+          </tbody>
+        </table>
+        <p class="note">Pattern: Spark excels at <strong>large full-table scans and simple
+            aggregations</strong> where 48 vCPU matter most.</p>
+      </section>
+
+      <!-- 13. When DuckDB wins -->
+      <section>
+        <h2>When <span class="duck">DuckDB</span> Wins</h2>
+        <table class="t" style="margin-top:0.5rem;">
+          <thead>
+            <tr>
+              <th>Query</th>
+              <th>DuckDB</th>
+              <th>Spark</th>
+              <th>Reason</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>Q21</strong></td>
+              <td><strong>31.30 s</strong></td>
+              <td>55.36 s</td>
+              <td>EXISTS/NOT EXISTS → local semi/anti-join, no shuffle</td>
+            </tr>
+            <tr>
+              <td><strong>Q5</strong></td>
+              <td><strong>17.20 s</strong></td>
+              <td>26.79 s</td>
+              <td>6-table JOIN - dimensions cached in local RAM</td>
+            </tr>
+            <tr>
+              <td><strong>Q3</strong></td>
+              <td><strong>15.59 s</strong></td>
+              <td>16.16 s</td>
+              <td>Effectively a tie (&lt;4% difference)</td>
+            </tr>
+          </tbody>
+        </table>
+        <p class="note">Pattern: DuckDB excels at <strong>complex joins and correlated subqueries</strong> -
+          zero network overhead.</p>
+      </section>
+
+      <!-- 14. Conclusions -->
+      <section>
+        <h2>Conclusions</h2>
+        <ul style="line-height:1.45; font-size:0.92em;">
+          <li><span class="duck">DuckDB</span> and <span class="spark">Spark</span> are <strong>evenly matched</strong>
+            at 100 GB with equal RAM (3 wins each) - DuckDB tied a cluster with <strong>6× fewer cores</strong> (8 vs 48 vCPU)</li>
+          <li>Scale-up is <strong>simpler, cheaper, and faster to set up</strong> - no cluster management</li>
+          <li>Scale-out pays off when data <strong>exceeds node RAM</strong>, or when fault-tolerance / streaming is
+            needed</li>
+          <li><strong>Recommendation:</strong> start with DuckDB on a single node; move to Spark only when you hit a
+            need above that DuckDB can't meet</li>
+        </ul>
+      </section>
+
+      <!-- 15. End slide -->
+      <section style="text-align:center;">
+        <br><br>
+        <h2 style="font-size:2em;">Thank you</h2>
+        <br>
+        <p style="font-size:1.1em; color:#555;">Franciszek Job &nbsp;&amp;&nbsp; Przemysław Popowski</p>
+        <p style="color:#777; font-size:0.85em;">AGH University of Science and Technology · 2025/26</p>
+      </section>
+
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/reveal.js@4.6.0/dist/reveal.js"></script>
+  <script>
+    Reveal.initialize({
+      hash: true,
+      slideNumber: true,
+      transition: 'none',
+      controls: true,
+      progress: true,
+      center: false,
+      width: 1100,
+      height: 800,
+      margin: 0.04,
+      plugins: []
+    });
+  </script>
+</body>
+
+</html>
